@@ -1,0 +1,108 @@
+@startuml
+
+interface Observer {
+    + update(e : Evenement) : void
+}
+
+interface Observable {
+    + addObserver(obs : Observer) : void
+    + removeObserver(obs : Observer) : void
+    + notifyObservers(e : Evenement) : void
+}
+
+class Evenement {
+    - nomAgent : String
+    - transaction : Transaction
+}
+
+class Agent {
+    - nom : String
+    - transactions : List<Transaction>
+    - observers : List<Observer>
+    - notificationHandler : NotificationHandler
+    + setNotificationHandler(h : NotificationHandler) : void
+    + update(e : Evenement) : void
+    + toString() : String
+    + maxTransaction() : Transaction
+}
+
+Observable <|.. Agent
+Observer <|.. Agent
+
+interface NotificationHandler {
+    + apply(e : Evenement) : void
+}
+
+class ScoringStrategy {
+    - solde : double
+    + apply(e : Evenement) : void
+}
+
+class HistoryStrategy {
+    - historique : List<Transaction>
+    + apply(e : Evenement) : void
+}
+
+NotificationHandler <|.. ScoringStrategy
+NotificationHandler <|.. HistoryStrategy
+
+class Transaction {
+    - id : String
+    - date : Date
+    - montant : Double
+    - type : TransactionType
+}
+
+enum TransactionType {
+    Vente
+    Achat
+}
+
+interface TransactionBuilder {
+    + setId(id : String) : TransactionBuilder
+    + setDate(date : Date) : TransactionBuilder
+    + setMontant(montant : double) : TransactionBuilder
+    + setType(type : TransactionType) : TransactionBuilder
+    + build() : Transaction
+}
+
+class ConcreteTransactionBuilder
+TransactionBuilder <|-- ConcreteTransactionBuilder
+ConcreteTransactionBuilder --> Transaction : build()
+
+class AgentContainer {
+    - agents : HashMap<String, Agent>
+    - static instance : AgentContainer
+    - hdmi : HDMI
+    + getInstance() : AgentContainer
+    + add(a : Agent) : void
+    + deleteAgent(name : String) : void
+    + getAgent(name : String) : Agent
+    + connect(hdmi : HDMI) : void
+    + send(message : String) : void
+}
+
+interface HDMI {
+    + print(message : String) : void
+}
+
+interface VGA {
+    + show(data : byte[]) : void
+}
+
+class VgaHdmiAdapter {
+    - vga : VGA
+    + setVga(vga : VGA) : void
+    + print(message : String) : void
+}
+
+HDMI <|.. VgaHdmiAdapter
+VgaHdmiAdapter --> VGA
+
+Agent --> Transaction
+Agent --> Evenement
+Agent --> NotificationHandler
+AgentContainer --> Agent
+AgentContainer --> HDMI
+
+@enduml
